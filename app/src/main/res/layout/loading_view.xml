@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    >
+
+
+    <com.example.carl.animation_loading.ShapeView
+        android:id="@+id/shape_view"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginBottom="82dp"
+        />
+
+    <View
+        android:id="@+id/shadow_view"
+        android:background="@drawable/loading_shadow_bg"
+        android:layout_width="25dp"
+        android:layout_height="3dp"/>
+
+    <TextView
+        android:layout_marginTop="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="玩命加载中。。。"/>
+
+
+
+
+</LinearLayout>
