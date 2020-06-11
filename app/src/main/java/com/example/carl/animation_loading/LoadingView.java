@@ -21,6 +21,8 @@ public class LoadingView extends LinearLayout {
     private View mShadowView;
     private int mTranslationDistance = 0;
     private final int ANIMATOR_DURATION=350;
+    private AnimatorSet mFallAnimatorSet,mUpAnimatorSet;
+    private boolean mIsStopAnimator = true;
     public LoadingView(Context context) {
         //super(context);
         this(context,null);
@@ -35,7 +37,10 @@ public class LoadingView extends LinearLayout {
         super(context, attrs, defStyleAttr);
         mTranslationDistance = dip2px(80);
         initLayout();
+        initAnimator();
     }
+
+
 
     private int dip2px(int dip) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,dip,getResources().getDisplayMetrics());
@@ -58,54 +63,28 @@ public class LoadingView extends LinearLayout {
         });
 
     }
-    private void startFallAnimator(){
-        //动画在谁身上
-        ObjectAnimator translationAnimator = ObjectAnimator.ofFloat(mShapeView,"translationY",0,mTranslationDistance);
+    private void initAnimator() {
+        ObjectAnimator translationAnimator_up = ObjectAnimator.ofFloat(mShapeView,"translationY",mTranslationDistance,0);
         //translationAnimator.setDuration(ANIMATOR_DURATION);
         //translationAnimator.start();
 
-        ObjectAnimator scaleAnimator = ObjectAnimator.ofFloat(mShadowView,"scaleX",1f,0.3f);
+        ObjectAnimator scaleAnimator_up = ObjectAnimator.ofFloat(mShadowView,"scaleX",0.3f,1f);
         //scaleAnimator.setDuration(ANIMATOR_DURATION);
         //scaleAnimator.start();
 
-        AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.playTogether(translationAnimator,scaleAnimator);
-        animatorSet.setDuration(ANIMATOR_DURATION);
-        //下落速度越来越快 插值器
-        animatorSet.setInterpolator(new AccelerateInterpolator());
-        animatorSet.start();
-        //下落之后上抛，监听动画完毕。
-        animatorSet.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mShapeView.exchanged();
-                startUpAnimator();
-
-            }
-        });
-    }
-    private void startUpAnimator(){
-        Log.i("chen","startUpAnimator->");
-        //动画在谁身上
-        ObjectAnimator translationAnimator = ObjectAnimator.ofFloat(mShapeView,"translationY",mTranslationDistance,0);
-        //translationAnimator.setDuration(ANIMATOR_DURATION);
-        //translationAnimator.start();
-
-        ObjectAnimator scaleAnimator = ObjectAnimator.ofFloat(mShadowView,"scaleX",0.3f,1f);
-        //scaleAnimator.setDuration(ANIMATOR_DURATION);
-        //scaleAnimator.start();
-
-        AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.playTogether(translationAnimator,scaleAnimator);
-        animatorSet.setDuration(ANIMATOR_DURATION);
+        mUpAnimatorSet = new AnimatorSet();
+        mUpAnimatorSet.playTogether(translationAnimator_up,scaleAnimator_up);
+        mUpAnimatorSet.setDuration(ANIMATOR_DURATION);
         //上抛越来越慢 插值器
-        animatorSet.setInterpolator(new DecelerateInterpolator());
+        mUpAnimatorSet.setInterpolator(new DecelerateInterpolator());
 
         //下落之后上抛，监听动画完毕。
-        animatorSet.addListener(new AnimatorListenerAdapter() {
+        mUpAnimatorSet.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
+                mIsStopAnimator = true;
                 startFallAnimator();
+
             }
 
             @Override
@@ -113,7 +92,45 @@ public class LoadingView extends LinearLayout {
                 startRotationAnimator();
             }
         });
-        animatorSet.start();
+
+
+        ObjectAnimator translationAnimator_fall = ObjectAnimator.ofFloat(mShapeView,"translationY",0,mTranslationDistance);
+        //translationAnimator.setDuration(ANIMATOR_DURATION);
+        //translationAnimator.start();
+
+        ObjectAnimator scaleAnimator_fall = ObjectAnimator.ofFloat(mShadowView,"scaleX",1f,0.3f);
+        //scaleAnimator.setDuration(ANIMATOR_DURATION);
+        //scaleAnimator.start();
+
+        mFallAnimatorSet = new AnimatorSet();
+        mFallAnimatorSet.playTogether(translationAnimator_fall,scaleAnimator_fall);
+        mFallAnimatorSet.setDuration(ANIMATOR_DURATION);
+        //下落速度越来越快 插值器
+        mFallAnimatorSet.setInterpolator(new AccelerateInterpolator());
+        mFallAnimatorSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mShapeView.exchanged();
+                mIsStopAnimator = true;
+                startUpAnimator();
+
+
+            }
+        });
+
+
+    }
+    private void startFallAnimator(){
+        if (mIsStopAnimator) {
+            mFallAnimatorSet.start();
+            mIsStopAnimator=false;
+        }
+    }
+    private void startUpAnimator(){
+        if (mIsStopAnimator) {
+            mUpAnimatorSet.start();
+            mIsStopAnimator=false;
+        }
     }
     private void  startRotationAnimator(){
         ObjectAnimator rotationAnimator = null;
